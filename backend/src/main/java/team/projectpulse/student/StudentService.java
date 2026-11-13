@@ -117,7 +117,7 @@ public class StudentService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         // If the user is an admin, then the user can update all the fields
-        if (authentication.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_instructor"))) {
+        if (authentication.getAuthorities().stream().anyMatch(grantedAuthority -> "ROLE_instructor".equals(grantedAuthority.getAuthority()))) {
             oldStudent.setEnabled(update.isEnabled());
 //            oldStudent.setRoles(update.getRoles());
         }
