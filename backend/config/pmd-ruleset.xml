@@ -20,5 +20,10 @@
              same comment on some thirty constructors whose reason is this one. -->
         <exclude name="UnnecessaryConstructor"/>
         <exclude name="UncommentedEmptyConstructor"/>
+        <!-- D4. Project Pulse logs only through SLF4J with {} placeholders, which skip building the message when
+             the level is off. What PMD still flags is an argument that is a method call, and in all four findings
+             that call is a getter or a size (getEmail(), getSectionName(), sent(), size(), getName()). An if (isXEnabled()) guard
+             around each would cost more to read than the getter costs to run. -->
+        <exclude name="GuardLogStatement"/>
     </rule>
 </ruleset>
