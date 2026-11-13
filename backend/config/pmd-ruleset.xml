@@ -13,5 +13,17 @@
          xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
     <description>PMD quickstart, with Project Pulse's decisions.</description>
     <rule ref="rulesets/java/quickstart.xml">
+        <!-- D2. Almost every finding is the empty no-arg constructor of a JPA entity, which Hibernate needs to
+             load a row. Writing it out is deliberate: if someone later adds a constructor with arguments, an
+             implicit no-arg constructor silently disappears and loading fails at runtime, not at compile time.
+             UnnecessaryConstructor would remove that guard, and UncommentedEmptyConstructor would ask for the
+             same comment on some thirty constructors whose reason is this one. -->
+        <exclude name="UnnecessaryConstructor"/>
+        <exclude name="UncommentedEmptyConstructor"/>
+        <!-- D4. Project Pulse logs only through SLF4J with {} placeholders, which skip building the message when
+             the level is off. What PMD still flags is an argument that is a method call, and in all four findings
+             that call is a getter or a size (getEmail(), getSectionName(), sent(), size(), getName()). An if (isXEnabled()) guard
+             around each would cost more to read than the getter costs to run. -->
+        <exclude name="GuardLogStatement"/>
     </rule>
 </ruleset>

@@ -7,4 +7,47 @@
 
      Unlike the baseline, this file may grow, but every entry is a reviewed decision. -->
 <FindBugsFilter>
+  <!-- D1, EI_EXPOSE_REP / EI_EXPOSE_REP2: narrowed. Off for the four kinds of class below, where sharing the
+       object is the design and a defensive copy would be wrong; on everywhere else.
+       Checked against the 219 findings baselined on 2026-11-01. -->
+
+  <!-- 1. JPA entities and embeddables. Their associations and collections are shared on purpose: Hibernate
+       replaces a collection with its own tracked one and lazy-loads associations, so a getter that returned a
+       copy, or a setter that stored one, would break lazy loading, dirty checking, and cascades.
+       The classes are listed by name because a filter cannot match the @Entity annotation;
+       a new entity needs adding here. -->
+  <Match>
+    <Class name="~(team\.projectpulse\.activity\.Activity|team\.projectpulse\.course\.Course|team\.projectpulse\.evaluation\.PeerEvaluation|team\.projectpulse\.evaluation\.Rating|team\.projectpulse\.instructor\.Instructor|team\.projectpulse\.ram\.collaboration\.Comment|team\.projectpulse\.ram\.collaboration\.CommentThread|team\.projectpulse\.ram\.document\.DocumentSection|team\.projectpulse\.ram\.document\.DocumentSectionLock|team\.projectpulse\.ram\.document\.RequirementDocument|team\.projectpulse\.ram\.requirement\.ArtifactKeySequence|team\.projectpulse\.ram\.requirement\.ArtifactLink|team\.projectpulse\.ram\.requirement\.RequirementArtifact|team\.projectpulse\.ram\.usecase\.UseCase|team\.projectpulse\.ram\.usecase\.UseCaseExtension|team\.projectpulse\.ram\.usecase\.UseCaseExtensionStep|team\.projectpulse\.ram\.usecase\.UseCaseLock|team\.projectpulse\.ram\.usecase\.UseCaseMainStep|team\.projectpulse\.rubric\.Criterion|team\.projectpulse\.rubric\.Rubric|team\.projectpulse\.section\.Section|team\.projectpulse\.student\.Student|team\.projectpulse\.team\.Team)"/>
+    <Or><Bug pattern="EI_EXPOSE_REP"/><Bug pattern="EI_EXPOSE_REP2"/></Or>
+  </Match>
+
+  <!-- 2. Spring components. They store the beans they are given by constructor injection, and those beans
+       are singletons meant to be shared; copying one is not possible and would defeat injection. -->
+  <Match>
+    <Class name="~(team\.projectpulse\.activity\.ActivityController|team\.projectpulse\.course\.CourseController|team\.projectpulse\.evaluation\.EvaluationController|team\.projectpulse\.instructor\.InstructorController|team\.projectpulse\.instructor\.InstructorService|team\.projectpulse\.notification\.ReminderController|team\.projectpulse\.notification\.ReminderService\$ReminderResult|team\.projectpulse\.notification\.SubmissionStatusService|team\.projectpulse\.notification\.WeeklyReminderScheduler|team\.projectpulse\.ram\.collaboration\.CommentController|team\.projectpulse\.ram\.document\.DocumentSectionService|team\.projectpulse\.ram\.glossary\.GlossaryService|team\.projectpulse\.ram\.requirement\.ArtifactLinkController|team\.projectpulse\.ram\.requirement\.RequirementArtifactController|team\.projectpulse\.ram\.usecase\.UseCaseService|team\.projectpulse\.rubric\.CriterionController|team\.projectpulse\.rubric\.RubricController|team\.projectpulse\.section\.SectionController|team\.projectpulse\.section\.SectionService|team\.projectpulse\.seed\.DataInitializer|team\.projectpulse\.student\.StudentController|team\.projectpulse\.student\.StudentService|team\.projectpulse\.team\.TeamController|team\.projectpulse\.user\.UserController|team\.projectpulse\.user\.UserService|team\.projectpulse\.user\.resetpassword\.ResetPasswordService)"/>
+    <Or><Bug pattern="EI_EXPOSE_REP"/><Bug pattern="EI_EXPOSE_REP2"/></Or>
+  </Match>
+
+  <!-- 3. DTOs and the per-request report objects that act as DTOs (PeerEvaluationAverage,
+       WeeklyPeerEvaluationReport). Each is built for one response and serialized to JSON; nothing keeps it
+       afterwards, so no one else can see a change to a list it holds. -->
+  <Match>
+    <Or>
+      <Class name="~team\.projectpulse\..*\.dto\..*"/>
+      <Class name="~team\.projectpulse\..*Dto"/>
+      <Class name="team.projectpulse.evaluation.PeerEvaluationAverage"/>
+      <Class name="team.projectpulse.evaluation.WeeklyPeerEvaluationReport"/>
+    </Or>
+    <Or><Bug pattern="EI_EXPOSE_REP"/><Bug pattern="EI_EXPOSE_REP2"/></Or>
+  </Match>
+
+  <!-- 4. MyUserPrincipal: Spring Security's adapter around the user entity. It must hold that entity,
+       not a copy, for the same reasons as 1. -->
+  <Match>
+    <Class name="team.projectpulse.user.MyUserPrincipal"/>
+    <Or><Bug pattern="EI_EXPOSE_REP"/><Bug pattern="EI_EXPOSE_REP2"/></Or>
+  </Match>
+
+  <!-- Still enforced everywhere else. Its one baselined finding outside these four, DocumentTemplate (a
+       template loaded once and shared by every request), was fixed rather than excluded. -->
 </FindBugsFilter>
