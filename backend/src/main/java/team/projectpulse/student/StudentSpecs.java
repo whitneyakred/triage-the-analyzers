@@ -4,7 +4,11 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.util.Locale;
 
-public class StudentSpecs {
+public final class StudentSpecs {
+
+    private StudentSpecs() {
+        // Static factory methods only; never instantiated
+    }
 
     public static Specification<Student> containsFirstName(String providedFirstName) {
         return (root, query, criteriaBuilder) ->
