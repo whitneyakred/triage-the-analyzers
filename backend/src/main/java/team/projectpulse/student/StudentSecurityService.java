@@ -40,7 +40,10 @@ public class StudentSecurityService {
     public boolean isCurrentUserInstructorOfStudentSection(Integer studentId) {
         Integer instructorIdFromJwt = this.userUtils.getUserId();
         Student student = this.studentRepository.findById(studentId).orElse(null);
-        if (student == null) {
+        // NOPMD below: SimplifyBooleanReturns would fold this into one "student != null && ..." return. Same
+        // behavior, but in an authorization check the explicit "no such student, deny" guard is easier to verify,
+        // and it is the guard-clause style the codebase uses elsewhere.
+        if (student == null) { // NOPMD - SimplifyBooleanReturns: explicit deny guard kept on purpose, see above
             return false;
         }
         return student.getSection().getInstructors().stream()
